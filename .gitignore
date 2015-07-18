@@ -1,0 +1,7 @@
+/vendor
+.env
+.env.example
+.gitattributes
+composer.lock
+gulpfile.js
+package.json
