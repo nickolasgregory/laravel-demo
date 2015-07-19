@@ -9,16 +9,15 @@
         <fieldset>
             <legend>Please Login</legend>
 
-{{--
-            <label for="email">Email</label>
-            <input  id="email" name="email" type="email" placeholder="Email" value="nickolasgregory@gmail.com">
---}}
+            @if (Auth::check())
+            <p>You are already logged in as <em>{!! Auth::user()['name'] !!}</em></p>
+            @endif
 
             <label for="name">Name</label>
-            <input  id="name" name="name" placeholder="Name" autocomplete="off">
+            <input  id="name" name="name" placeholder="Name" autocomplete="off" class="pure-u-1">
 
             <label for="password">Password</label>
-            <input  id="password" name="password" type="password" placeholder="Password">
+            <input  id="password" name="password" type="password" placeholder="Password" class="pure-u-1">
 
             <label for="remember" class="pure-checkbox">
                 <input id="remember" type="checkbox"> Remember me

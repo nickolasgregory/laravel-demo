@@ -14,7 +14,15 @@
 
     @yield('content')
 
-    <a href="{{ url('') }}">Home</a> <a href="{{ url('auth/logout') }}">logout</a>
+    <hr>
+
+    <div class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item"><a href="{{ url('') }}" class="pure-menu-link">Return to Site</a></li>
+            <li class="pure-menu-item"><a href="{{ url('auth/logout') }}" class="pure-menu-link pure-menu-link-logout">Logout</a></li>
+        </ul>
+    </div>
+
 </div><!-- #layout -->
 </body>
 </html>
