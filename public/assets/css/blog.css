@@ -1,0 +1,111 @@
+
+/*
+------------------------------------------------------------------ */
+
+#overlay {
+    position: fixed;
+    top:    0;
+    bottom: 0;
+    left:   0;
+    right:  0;
+    background: rgba(0,0,0,0.8);
+    z-index: 99;
+}
+
+#overlay .login {
+    position: relative;
+    width: 320px;
+    margin: 4em auto;
+    padding: 2em 2em;
+    background: #fff;
+}
+
+
+/*
+------------------------------------------------------------------ */
+
+.pure-g > div {
+    padding: 0 2em;
+}
+
+body {
+    font-family: Nunito, Arial, sans-serif;
+}
+
+header {
+    background: #e64e24;
+    color: #fff;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    height: 2em;
+    width: 100%;
+    z-index: 9;
+
+    background: #999;
+}
+
+header .content,
+main   .content,
+footer .content {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+header .content h1 {
+    margin: 0;
+    text-align: center;
+    letter-spacing: 4px;
+}
+
+header .content .pure-menu a {
+    color: #fff;
+}
+header .content .pure-menu a:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+header .content .pure-menu a.admin-link {
+    color: #000;
+}
+
+
+
+/*  <https://github.com/daneden/animate.css>
+------------------------------------------------------------------ */
+
+@keyframes rubberBand {
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+
+  30% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+
+  40% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+
+  50% {
+    transform: scale3d(1.15, 0.85, 1);
+  }
+
+  65% {
+    transform: scale3d(.95, 1.05, 1);
+  }
+
+  75% {
+    transform: scale3d(1.05, .95, 1);
+  }
+
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+.rubberBand {
+  animation-name: rubberBand;
+}
