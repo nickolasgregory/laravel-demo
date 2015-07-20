@@ -94,8 +94,10 @@ var layoutMain = function (body, sidebar) {
         m('footer',
             m('.content', [
                 m('.pure-g', [
-                    m('.pure-u-1.pure-u-md-1-2', "Footer Thing 1"),
-                    m('.pure-u-1.pure-u-md-1-2', "Footer Thing 2")
+                    m('.pure-u-1.pure-u-md-1-2', "Footer"),
+                    m('.pure-u-1.pure-u-md-1-2',
+                        m('a', {href: '/auth/login'}, "Login")
+                    )
                 ])
             ])
         ),
@@ -170,18 +172,27 @@ var Post = function (data) {
     this.comments = m.prop(data.comments    || [])
 }
 
+
 /**
  * XHR get list of Posts
  *
  * @param {Object} data
  */
 Post.list = function () {
+    if (Post.list_cache()) return Post.list_cache
     return m.request({
         method: 'GET',
         url: '/api/posts',
         type: Post
-    })
+    }).then(Post.list_cache)
 }
+
+/**
+ * Simple cache for Post.list
+ *
+ * @param {Object} data
+ */
+Post.list_cache = m.prop()
 
 /**
  * XHR get list of Posts
