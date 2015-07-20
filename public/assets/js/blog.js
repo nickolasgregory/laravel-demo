@@ -54,6 +54,9 @@ var layoutMain = function (body, sidebar) {
                         m('a.pure-menu-link', { config: m.route, href: '/' }, "Home")
                     ),
                     m('li.pure-menu-item',
+                        m('a.pure-menu-link', { config: m.route, href: '/blog' }, "Blog")
+                    ),
+                    m('li.pure-menu-item',
                         m('a.pure-menu-link', { config: m.route, href: '/about' }, "About")
                     ),
                     m('li.pure-menu-item',
@@ -66,7 +69,12 @@ var layoutMain = function (body, sidebar) {
                                 }
                             }
                         }, (APP.login ? "Admin" : "Login"))
-                    )
+                    ),
+                    APP.login ?
+                        m('li.pure-menu-item',
+                            m('a.pure-menu-link.admin-link', {href: '/auth/logout'}, "Logout")
+                        )
+                    : null
                 ])
             )
         ])),
@@ -131,7 +139,7 @@ var loginOverlay = {
                     }),
 
                     m('label[for=name]', "Name"),
-                    m('input#name.pure-u-1', {name: 'name'}),
+                    m('input#name.pure-u-1[autofocus]', {name: 'name'}),
 
                     m('label[for=password]', "Password"),
                     m('input#password[type=password].pure-u-1', {name: 'password'}),
@@ -153,11 +161,13 @@ var Post = function (data) {
 
     data = data || {}
 
-    this.id     = m.prop(data.id     || null)
-    this.title  = m.prop(data.title  || "No Posts")
-    this.body   = m.prop(data.body   || "")
-    this.author = m.prop(data.author || "")
-    this.date   = m.prop(data.date   || "")
+    this.id       = m.prop(data.id          || null)
+    this.title    = m.prop(data.title       || "No Posts")
+    this.body     = m.prop(data.body        || "")
+    this.date     = m.prop(data.created_at  || "")
+    this.user_id  = m.prop(data.user_id     || 0)
+    this.user     = m.prop(data.user        || [])
+    this.comments = m.prop(data.comments    || [])
 }
 
 /**
@@ -170,6 +180,54 @@ Post.list = function () {
         method: 'GET',
         url: '/api/posts',
         type: Post
+    })
+}
+
+/**
+ * XHR get list of Posts
+ *
+ * @param {Object} data
+ */
+Post.get = function () {
+    return m.request({
+        method: 'GET',
+        url: '/api/post/' + m.route.param('id'),
+        type: Post
+    })
+}
+
+
+/**
+ * Comment Model
+ *
+ * @param {Object} data
+ */
+var Comment = function (data) {
+
+    data = data || {}
+
+    this.body = m.prop(data.body || "")
+}
+
+Comment.post = function (comment) {
+    return m.request({
+        method: 'POST',
+        url: '/admin/comment/',
+        config: function(xhr) {
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+        },
+        unwrapError: function (resp) {
+            if (resp.error) {
+                alert(resp.error)
+            } else {
+                // TODO: fire CommentAdded event to notify Comment list
+            }
+        },
+        data: {
+            post_id: m.route.param('id'),
+            comment_body: comment.body(),
+            _token: APP.csrf
+        }
     })
 }
 
@@ -196,11 +254,39 @@ var PostsListComponent = {
                     return m('li.pure-menu-item',
                         m('a.pure-menu-link', {
                             config: m.route,
-                            href: '/post/' + post.id()
+                            href: '/blog/' + post.id()
                         }, post.title())
                     )
                 }))
             )
+        ])
+    }
+}
+
+
+/**
+ * Comment Form
+ *
+ * @type Object
+ */
+var PostCommentComponent = {
+
+    controller: function (args) {
+        return {
+            comment: new Comment()
+        }
+    },
+
+    view: function (ctrl, args) {
+        return m('form.pure-form', {
+            onsubmit: function (evt) {
+                evt.preventDefault()
+                Comment.post(ctrl.comment)
+            }
+        }, [
+            m('', "Hello " + APP.login + " :)"),
+            m('textarea[name=comment][placeholder=Comment].pure-u-1', {oninput: m.withAttr('value', ctrl.comment.body), value: ctrl.comment.body()}),
+            m('button[type=submit].pure-button', "OK")
         ])
     }
 }
@@ -223,10 +309,11 @@ var RegisterComponent = {
                 method: 'POST',
                 url: '/auth/register',
             }, [
-                m('input[name=name][placeholder=Name].pure-u-1'),
-                m('input[name=password][placeholder=Password].pure-u-1'),
-                m('input[type=hidden]', { name: '_token', value: APP.csrf }),
-                m('button[type=submit].pure-button', "OK")
+                m('input[name=name][placeholder=Name].pure-u-1', {disabled: 'disabled'}),
+                m('input[name=password][placeholder=Password].pure-u-1', {disabled: 'disabled'}),
+                m('input[type=hidden]', { name: '_token', value: APP.csrf}),
+                m('button[type=submit].pure-button', {disabled: 'disabled'}, "OK"),
+                m('', m.trust("<em>Registrations are disabled.<br>Only Administrators may comment.</em>"))
             ])
         ])
     }
@@ -245,24 +332,30 @@ var viewPage = {
         var content = m.prop({})
         var postList = Post.list()
 
-        // These would be XHR requests for 'page'
+        // These would be XHRs for Page Models
         switch ( m.route.param('page') ) {
+
+            case 'blog':
+                content([
+                    m('h2', "BLOG Entries"),
+                    m.component(PostsListComponent, {
+                        title: "Here are all the posts", // unpaginated :\
+                        postList: postList
+                    })
+                ])
+            break
 
             case 'about':
                 content([
-                    m('h2', "ABOUT the blog of iswym."),
+                    m('h2', "ABOUT the iswym blog."),
                     m('p', "About About About About About About About About About ")
                 ])
             break
 
             default:
                 content([
-                    m('h2', "The iswym blog."),
-                    m('p', "This is the blog of iswym. This is the blog of iswym. This is the blog of iswym. "),
-                    m.component(PostsListComponent, {
-                        title: "Here are all the posts", // unpaginated :\
-                        postList: postList
-                    })
+                    m('h2', "HOME of the iswym blog."),
+                    m('p', "This is the blog of iswym. This is the blog of iswym. This is the blog of iswym. ")
                 ])
         }
 
@@ -282,11 +375,11 @@ var viewPage = {
                 ctrl.content()
             ],
             [
-                m.component(RegisterComponent, {}),
                 m.component(PostsListComponent, {
                     // title: "Archive",
                     postList: ctrl.postList
-                })
+                }),
+                m.component(RegisterComponent, {})
             ]
         )
     }
@@ -303,11 +396,7 @@ var viewPost = {
     controller: function () {
         return {
             postList: Post.list(),
-            post: m.request({
-                method: 'GET',
-                url: '/api/post/' + m.route.param('id'),
-                type: Post
-            })
+            post: Post.get(m.route.param('id'))
         }
     },
 
@@ -320,23 +409,44 @@ var viewPost = {
             [
                 // Post
                 m('h2.post-title', ctrl.post().title()),
-                m('em.post-author', ctrl.post().author()),
-
-                m('hr'),
-                m('br'),
+                m('.post-info',  [
+                    m('strong', ctrl.post().user().name), " wrote this on ", m('em', ctrl.post().date())
+                ]),
                 m('.post-body', m.trust(ctrl.post().body())),
-                m('br'),
-                m('hr'),
 
-                // Comments
 
                 // should be a plug-in of some sort
                 APP.login ?
-                    m('a.pure-button' , { href: '/admin/post/' + ctrl.post().id() }, m.trust("Edit"))
-                :null
+                    m('a.pure-button.pure-button-primary' , { href: '/admin/post/' + ctrl.post().id() }, m.trust("Edit"))
+                : null,
+
+                m('hr'),
+
+                // Comments
+                m('h4', "Comments"),
+                m('.comments', ctrl.post().comments().map(function (comment) {
+                    return m('.comment', [
+                        m('p.comment-body', comment.body),
+                        m('p.comment-info', [
+                            m('strong', comment.user.name), " wrote this on ", m('em', comment.created_at)
+                        ]),
+                    ])
+                })),
+
+                m('hr'),
+
+                // Add Comment
+                APP.login ? [
+                    m.component(PostCommentComponent)
+                ]
+                : [
+                    m('pure-g', [
+                        m('.pure-u-1-2', m.component(RegisterComponent)),
+                        m('.pure-u-1-2', m('h4', "Terms & Conditions"))
+                    ])
+                ],
             ],
             [
-                m.component(RegisterComponent, {}),
                 m.component(PostsListComponent, {
                     title: "Archive",
                     postList: ctrl.postList

@@ -21,14 +21,18 @@
 <script>
 
 var APP = {
-    login: {{ Auth::check() ? 'true' : 'false' }},
+    login: {!! Auth::check() ? '"'.Auth::user()->name.'"' : 'false' !!},
     csrf: '{!! csrf_token() !!}'
 }
+{{--
+    Should send CSRF as header 'X-CSRF-TOKEN' as Laravel will read it :)
+    also; could be stored <meta name="csrf-token" value="...">
+--}}
 
 m.route(document.getElementById('app'), '/', {
     '/': viewPage,
     '/:page': viewPage,
-    '/post/:id': viewPost
+    '/blog/:id': viewPost
 })
 </script>
 </body>

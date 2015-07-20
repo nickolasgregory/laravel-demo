@@ -10,13 +10,16 @@
 
     <a class="pure-button pure-button-primary" href="/admin/add">Add Post</a>
 
+    <br>
+    <br>
+
     <div class="pure-menu">
         <ul class="pure-menu-list">
     @foreach ($posts as $post)
             <li class="pure-menu-item">
                 <a href="{{ url('admin') }}/post/{{ $post->id }}" class="pure-menu-link" style="padding: 1em;">
                     Edit Post "<strong>{{ $post->title }}</strong>" [Id:{{ $post->id }}]<br>
-                    <small>{{ $post->author }}</small>
+                    <small>{{ $post->user->name }} @ {{ $post->updated_at }}</small>
                 </a>
             </li>
     @endforeach

@@ -29,6 +29,7 @@
 }
 
 body {
+    padding-bottom: 4em;
     font-family: Nunito, Arial, sans-serif;
 }
 
@@ -71,6 +72,20 @@ header .content .pure-menu a.admin-link {
     color: #000;
 }
 
+.post-body {
+    padding: 1em;
+}
+.post-info,
+.comment-info {
+    text-align: right;
+    font-style: italic;
+}
+
+.comment {
+    margin: 4px;
+    padding: 2px 8px;
+    background: #eee;
+}
 
 
 /*  <https://github.com/daneden/animate.css>

@@ -28,6 +28,7 @@ class AdminController extends Controller
         return view('admin.home');
     }
 
+
     /**
      * Display a listing of Posts
      *
@@ -35,7 +36,9 @@ class AdminController extends Controller
      */
     public function getPosts()
     {
-        $posts = \App\Post::all(); // TODO: pagination  Post::skip(10)->take(1)->get();
+        $posts = \App\Post::orderBy('updated_at', 'desc')->get();
+        // TODO: pagination  Post::skip(10)->take(1)->get();
+
         return view('admin.posts', [
             'posts' => $posts,
         ]);
@@ -43,7 +46,39 @@ class AdminController extends Controller
 
 
     /**
-     *
+     *  View Add Post
+     */
+    public function getAdd()
+    {
+        $post = new \App\Post();
+
+        return view('admin.edit', [
+            'post' => $post,
+            'users' => \App\User::all(),
+            'selected_user' => \Auth::user()->id,
+        ]);
+    }
+
+
+    /**
+     *  Add a Post
+     */
+    public function postAdd()
+    {
+        $data = \Input::all();
+
+        $post = new \App\Post($data);
+        // TODO: validation
+
+        $post->save();
+
+        return redirect('admin/posts')
+            ->with('status', "Post {$post->id} Added");
+    }
+
+
+    /**
+     *  Retrieve a Post
      *
      * @param int $id
      * @return \Illuminate\View\View
@@ -76,49 +111,73 @@ class AdminController extends Controller
     public function postPost($id)
     {
         $data = \Input::all();
-        $post = \App\Post::find($id);
-        $post->update($data);
 
+        // get Post
+        $post = \App\Post::find($id);
+        if ( ! $post ) {
+            return redirect('admin/posts')
+                ->with('status', "Post $id Not Found");
+        }
+
+        // Delete if required
+        if ($data['confirm_delete']) {
+            // TODO: setting a 'deleted_at' field would be better
+            $post->delete();
+            return redirect('admin/posts')
+                ->with('status', "Post $id Deleted");
+        }
+
+        // Update Post
+        $post->update($data);
         return redirect('admin/posts')
             ->with('status', "Post $id Updated");
     }
 
 
     /**
-     *
-     *
-     */
-    public function postIndex()
-    {
-        return view('admin.post-not-found');
-    }
-
-
-    // TODO: should be in the AdminPostsController
-    /**
+     *  Add a Comment
      *
      */
-    public function postAdd()
+    public function postComment()
     {
         $data = \Input::all();
-        $post = new \App\Post($data);
-        $post->save();#$data);
 
-        return redirect('admin/posts')
-            ->with('status', "Post {$post->id} Added");
+        // Check Post exists
+        $post = \App\Post::find($data['post_id']);
+        if ( ! $post) {
+            return response()->json([
+                'status' => 404,
+                'error'  => "Post not Found"
+            ], 404);
+        }
+
+        // Build Comment record
+        $comment = new \App\Comment([
+            'post_id' => $post->id,
+            'user_id' => \Auth::user()->id,
+            'body' => $data['comment_body'],
+        ]);
+
+        if ($comment->save()) {
+            return response()->json([
+                'status' => 200,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 500,
+                'error'  => "Saved Failed"
+            ], 500);
+        }
     }
 
 
     /**
      *
+     *
      */
-    public function getAdd()
+    public function getComment()
     {
-        $post = new \App\Post();
-
-        return view('admin.edit', [
-            'post' => $post,
-        ]);
+        return redirect('admin');
     }
 
 }
