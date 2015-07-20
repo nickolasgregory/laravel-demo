@@ -166,6 +166,7 @@ var Post = function (data) {
     this.id       = m.prop(data.id          || null)
     this.title    = m.prop(data.title       || "No Posts")
     this.body     = m.prop(data.body        || "")
+    this.html     = m.prop(data.html        || "")
     this.date     = m.prop(data.created_at  || "")
     this.user_id  = m.prop(data.user_id     || 0)
     this.user     = m.prop(data.user        || [])
@@ -423,8 +424,7 @@ var viewPost = {
                 m('.post-info',  [
                     m('strong', ctrl.post().user().name), " wrote this on ", m('em', ctrl.post().date())
                 ]),
-                m('.post-body', m.trust(ctrl.post().body())),
-
+                m('.post-body', m.trust(ctrl.post().html())),
 
                 // should be a plug-in of some sort
                 APP.login ?

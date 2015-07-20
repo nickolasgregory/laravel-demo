@@ -69,6 +69,9 @@ class ApiController extends Controller
         $post->load(['user', 'comments']);
         $post->comments->load('user'); // nice :)
 
+        $converter = new \Parsedown();
+        $post->html = $converter->parse($post->body);
+
         return response()->json($post);
     }
 

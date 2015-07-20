@@ -120,7 +120,7 @@ class AdminController extends Controller
         }
 
         // Delete if required
-        if ($data['confirm_delete']) {
+        if ( ! empty($data['confirm_delete'])) {
             // TODO: setting a 'deleted_at' field would be better
             $post->delete();
             return redirect('admin/posts')
