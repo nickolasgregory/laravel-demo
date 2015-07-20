@@ -20,7 +20,7 @@
             @endforeach
             </select>
 
-            <label for="body">Body</label>
+            <label for="body">Body <small>markdown</small></label>
             <textarea id="body" name="body" class="pure-u-1">{{ $post->body }}</textarea>
 
             <button type="submit" class="pure-button pure-button-primary">Save</button>
