@@ -46,6 +46,7 @@ class ApiController extends Controller
     public function getPosts()
     {
         return response()->json(\App\Post::orderBy('updated_at', 'desc')->get());
+        // TODO: Parsedown each $post->body to ->html , or not return it
     }
 
 

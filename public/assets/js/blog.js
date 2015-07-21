@@ -221,18 +221,18 @@ var Comment = function (data) {
     this.body = m.prop(data.body || "")
 }
 
-Comment.post = function (comment) {
+Comment.post = function (comment, callback) {
     return m.request({
         method: 'POST',
         url: '/admin/comment/',
         config: function(xhr) {
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
         },
-        unwrapError: function (resp) {
+        unwrapSuccess: function (resp) {
             if (resp.error) {
                 alert(resp.error)
             } else {
-                // TODO: fire CommentAdded event to notify Comment list
+                callback()
             }
         },
         data: {
@@ -281,7 +281,7 @@ var PostsListComponent = {
  *
  * @type Object
  */
-var PostCommentComponent = {
+var AddCommentComponent = {
 
     controller: function (args) {
         return {
@@ -293,10 +293,13 @@ var PostCommentComponent = {
         return m('form.pure-form', {
             onsubmit: function (evt) {
                 evt.preventDefault()
-                Comment.post(ctrl.comment)
+                Comment.post(ctrl.comment, function () {
+                    ctrl.comment.body("")
+                    args.post = Post.get(args.post().id()).then(m.redraw)
+                })
             }
         }, [
-            m('', "Hello " + APP.login + " :)"),
+            m('', m.trust("Hello <em>" + APP.login + "</em> You may post comments :)")),
             m('textarea[name=comment][placeholder=Comment].pure-u-1', {oninput: m.withAttr('value', ctrl.comment.body), value: ctrl.comment.body()}),
             m('button[type=submit].pure-button', "OK")
         ])
@@ -407,7 +410,6 @@ var viewPost = {
 
     controller: function () {
         return {
-            postList: Post.list(),
             post: Post.get(m.route.param('id'))
         }
     },
@@ -448,7 +450,7 @@ var viewPost = {
 
                 // Add Comment
                 APP.login ? [
-                    m.component(PostCommentComponent)
+                    m.component(AddCommentComponent, {post: ctrl.post})
                 ]
                 : [
                     m('pure-g', [
@@ -460,7 +462,7 @@ var viewPost = {
             [
                 m.component(PostsListComponent, {
                     title: "Archive",
-                    postList: ctrl.postList
+                    postList: Post.list()
                 })
             ]
         )
