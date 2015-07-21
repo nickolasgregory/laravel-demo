@@ -143,6 +143,13 @@ class AdminController extends Controller
         $data = \Input::all();
 
         // Check Post exists
+        if (empty($data['post_id'])) {
+            return response()->json([
+                'status' => 404,
+                'error'  => "Post not Found"
+            ], 404);
+        }
+
         $post = \App\Post::find($data['post_id']);
         if ( ! $post) {
             return response()->json([

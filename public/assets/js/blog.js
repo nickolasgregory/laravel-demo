@@ -224,7 +224,7 @@ var Comment = function (data) {
 Comment.post = function (comment, callback) {
     return m.request({
         method: 'POST',
-        url: '/admin/comment/',
+        url: '/admin/comment',
         config: function(xhr) {
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
         },
